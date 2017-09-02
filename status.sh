@@ -69,4 +69,4 @@ echo -e ""
 
 echo "## mainpool Capacity  ##"
 echo -e ""
-echo -e Belegter Speicherplatz:'\n'$"var_zfs_cap_mainpool"
+echo -e Belegter Speicherplatz:'\n'"$var_zfs_cap_mainpool"
