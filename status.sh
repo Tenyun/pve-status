@@ -35,7 +35,7 @@ sensors | tail -n10 | head -n5 | awk '{ print $1,$2,$3,$4 }' | cut -d "(" -f 1
 echo -e ""
 echo "## Speicherauslastung ##"
 echo ""
-free -oh
+free -h
 echo -e ""
 
 echo "###########################################################################"
