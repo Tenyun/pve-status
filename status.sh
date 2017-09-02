@@ -17,7 +17,7 @@ var_zfs_last_snapshot_daily=$(echo "$var_zfs_last_snapshot_all" | grep daily | h
 var_zfs_last_snapshot_monthly=$(echo "$var_zfs_last_snapshot_all" | grep monthly | head -1 | awk -F_ '{print $(NF-2)"_"$(NF-1)}')
 var_zfs_last_snapshot_yearly=$(echo "$var_zfs_last_snapshot_all" | grep yearly | head -1 | awk -F_ '{print $(NF-2)"_"$(NF-1)}')
 var_zfs_snapshots_count=$(echo "$var_zfs_last_snapshot_all" | nl)
-var_zfs_cap_mainpool=$(zpool list -H -o capacity mainpool)
+var_zfs_cap_mainpool=$(zpool list -H -o name,capacity)
 
 printf "\ec"
 
@@ -69,4 +69,4 @@ echo -e ""
 
 echo "## mainpool Capacity  ##"
 echo -e ""
-echo Belegter Speicherplatz im mainpool: $var_zfs_cap_mainpool
+echo Belegter Speicherplatz: $var_zfs_cap_mainpool
