@@ -10,6 +10,7 @@ var_kernel=`uname -r`
 var_uptime=`uptime -p`
 var_cpu=`cat /proc/cpuinfo | grep "model name" -m1 | awk '{ print $4, $5, $6, $7, $8, $9, $10 }'`
 
+function get_zfs_data {
 var_zfs_last_snapshot_all=$(zfs list -H -t snapshot -o name -S creation)
 var_zfs_pool_status=$(zpool status | grep -E "(pool:|state:|scan:|errors:)" )
 var_zfs_last_snapshot_hourly=$(echo "$var_zfs_last_snapshot_all" | grep hourly | head -1 | awk -F_ '{print $(NF-1)}')
@@ -18,7 +19,7 @@ var_zfs_last_snapshot_monthly=$(echo "$var_zfs_last_snapshot_all" | grep monthly
 var_zfs_last_snapshot_yearly=$(echo "$var_zfs_last_snapshot_all" | grep yearly | head -1 | awk -F_ '{print $(NF-2)"_"$(NF-1)}')
 var_zfs_snapshots_count=$(echo "$var_zfs_last_snapshot_all" | nl)
 var_zfs_cap_mainpool=$(zpool list -H -o name,capacity)
-
+}
 printf "\ec"
 
 echo "###########################################################################"
@@ -41,6 +42,7 @@ echo -e ""
 echo "###########################################################################"
 echo "###                            ZFS-Filesystem                           ###"
 echo -e "###########################################################################\n"
+get_zfs_data
 echo "## Pool-Status ##"
 echo -e ""
 echo "$var_zfs_pool_status" | awk 'BEGIN{OFS = "-"; print "Pool-Name""\t""Status""\t""Last-Scrub""\t""\t""Repaired-Errors""\t""Scrub-Errors""\t""Time""\t""Data-Errors"}; /pool/{ POOL=$2; next} /state/{STATE=$2; next} /scan/{SCAN1=$12"-"$13"-"$14"-"$15; SCAN2=$4; SCAN3=$8; SCAN4=$6; next} /error/{$1=""; print POOL"\t"STATE"\t"SCAN1"\t"SCAN2"\t"SCAN3"\t"SCAN4"\t"$0}' | column -t
