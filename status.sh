@@ -1,4 +1,4 @@
- #!/bin/bash
+#!/bin/bash
 
 #
 # Dieses Script gibt einen Überblick über den PVE Server
@@ -10,7 +10,7 @@ var_kernel=`uname -r`
 var_uptime=`uptime -p`
 var_cpu=`cat /proc/cpuinfo | grep "model name" -m1 | awk '{ print $4, $5, $6, $7, $8, $9, $10 }'`
 
-function get_zfs_data {
+get_zfs_data() {
 var_zfs_last_snapshot_all=$(zfs list -H -t snapshot -o name -S creation)
 var_zfs_pool_status=$(zpool status | grep -E "(pool:|state:|scan:|errors:)" )
 var_zfs_last_snapshot_hourly=$(echo "$var_zfs_last_snapshot_all" | grep hourly | head -1 | awk -F_ '{print $(NF-1)}')
