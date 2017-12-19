@@ -32,7 +32,7 @@ echo -e CPU:'\t\t'$var_cpu
 echo -e ""
 echo "## Temperaturen CPU ##"
 echo -e ""
-sensors | tail -n19 | head -n5 | awk '{ print $1,$2,$3,$4 }' | cut -d "(" -f 1 | column -s : -t
+sensors | awk '/Core|Package/' | cut -d "(" -f 1
 echo -e ""
 echo "## Speicherauslastung ##"
 echo ""
