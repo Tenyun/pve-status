@@ -6,9 +6,9 @@
 #
 
 var_os=Debian
-var_kernel=`uname -r`
-var_uptime=`uptime -p`
-var_cpu=`cat /proc/cpuinfo | grep "model name" -m1 | awk '{ print $4, $5, $6, $7, $8, $9, $10 }'`
+var_kernel=$(uname -r)
+var_uptime=$(uptime -p)
+var_cpu=$(cat /proc/cpuinfo | grep "model name" -m1 | awk '{ print $4, $5, $6, $7, $8, $9, $10 }')
 
 get_zfs_data() {
 var_zfs_last_snapshot_all=$(zfs list -H -t snapshot -o name -S creation)
@@ -46,19 +46,7 @@ get_zfs_data
 echo "## Pool-Status ##"
 echo -e ""
 echo "$var_zfs_pool_status" | awk 'BEGIN{OFS = "-"; print "Pool-Name""\t""Status""\t""Last-Scrub""\t""\t""Repaired-Errors""\t""Scrub-Errors""\t""Time""\t""Data-Errors"}; /pool/{ POOL=$2; next} /state/{STATE=$2; next} /scan/{SCAN1=$12"-"$13"-"$14"-"$15; SCAN2=$4; SCAN3=$8; SCAN4=$6; next} /error/{$1=""; print POOL"\t"STATE"\t"SCAN1"\t"SCAN2"\t"SCAN3"\t"SCAN4"\t"$0}' | column -t
-#echo -e Pool-Name'\t'Status'\t'Last Scrub'\t\t'Repaired-Errors'\t'Scrub-Errors'\t'Time
-#echo awk '{print "Pool-Name","\t","Status","\t","Last Scrub","\t","\t","Repaired-Errors","\t","Scrub-Errors","\t","Time","\n"}'
-#echo $var_zfs_pool_status | awk '{print "Pool-Name","\t","Status","\t","Last Scrub","\t","\t","Repaired-Errors","\t","Scrub-Errors","\t","Time","\n",$2,"\t",$4,"\t",$16,$17,$18,$19,"\t",$8,"\t","\t","\t",$12,"\t","\t",$10}'
-#zpool status mainpool | grep -E "(pool:|state:|scan:|errors:)"
-#echo -e ""
-#echo -e $var_zfs_pool_status_rpool_format
-#zpool status rpool | grep -E "(pool:|state:|scan:|errors:)"
 echo -e ""
-
-#echo "## zpool iostat ##"
-#echo -e ""
-#zpool iostat mainpool
-#echo -e ""
 
 echo "## Snapshots ##"
 echo -e ""
