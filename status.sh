@@ -8,7 +8,7 @@
 var_os=Debian
 var_kernel=$(uname -r)
 var_uptime=$(uptime -p)
-var_cpu=$(cat /proc/cpuinfo | grep "model name" -m1 | awk '{ print $4, $5, $6, $7, $8, $9, $10 }')
+var_cpu=$( < /proc/cpuinfo grep "model name" -m1 | awk '{ print $4, $5, $6, $7, $8, $9, $10 }')
 
 get_zfs_data() {
 var_zfs_last_snapshot_all=$(zfs list -H -t snapshot -o name -S creation)
@@ -20,15 +20,23 @@ var_zfs_last_snapshot_yearly=$(echo "$var_zfs_last_snapshot_all" | grep yearly |
 var_zfs_snapshots_count=$(echo "$var_zfs_last_snapshot_all" | nl)
 var_zfs_cap_mainpool=$(zpool list -H -o name,capacity)
 }
-printf "\ec"
 
-echo "###########################################################################"
-echo "###				System-Info				###"
-echo -e "###########################################################################\n"
-echo -e System OS:'\t'$var_os
-echo -e Kernel:'\t\t'$var_kernel
-echo -e Uptime:'\t\t'$var_uptime
-echo -e CPU:'\t\t'$var_cpu
+printHeadLine(){
+    eval printf %.0s# '{1..'"${COLUMNS:-$(tput cols)}"\}; echo
+    textsize=${#1}
+    width=$(tput cols)
+    span=$((($width + $textsize) / 2))
+    printf "%${span}s\n" "$1"
+    eval printf %.0s# '{1..'"${COLUMNS:-$(tput cols)}"\}; echo
+}
+
+printf "\\ec"
+
+printHeadLine "System-Info"
+echo -e System OS:'\t'"$var_os"
+echo -e Kernel:'\t\t'"$var_kernel"
+echo -e Uptime:'\t\t'"$var_uptime"
+echo -e CPU:'\t\t'"$var_cpu"
 echo -e ""
 echo "## Temperaturen CPU ##"
 echo -e ""
@@ -39,9 +47,7 @@ echo ""
 free -h
 echo -e ""
 
-echo "###########################################################################"
-echo "###                            ZFS-Filesystem                           ###"
-echo -e "###########################################################################\n"
+printHeadLine "ZFS-Filesystem"
 get_zfs_data
 echo "## Pool-Status ##"
 echo -e ""
@@ -51,10 +57,10 @@ echo -e ""
 echo "## Snapshots ##"
 echo -e ""
 echo Lätzte Snapshots
-echo -e "Stündlich \tTäglich \tMonatlich \t\tJährlich"
-echo -e "$var_zfs_last_snapshot_hourly \t$var_zfs_last_snapshot_daily \t$var_zfs_last_snapshot_monthly \t$var_zfs_last_snapshot_yearly"
+echo -e "Stündlich \\tTäglich \\tMonatlich \\t\\tJährlich"
+echo -e "$var_zfs_last_snapshot_hourly \\t$var_zfs_last_snapshot_daily \\t$var_zfs_last_snapshot_monthly \\t$var_zfs_last_snapshot_yearly"
 echo -e ""
-echo Anzahl aller Snapschots: $var_zfs_snapshots_count
+echo Anzahl aller Snapschots: "$var_zfs_snapshots_count"
 echo -e ""
 
 echo "## mainpool Capacity  ##"
