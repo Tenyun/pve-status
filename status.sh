@@ -5,11 +5,6 @@
 # (hostname, ip, zfs-filesystem, zfs-snapshots, etc)
 #
 
-var_os=Debian
-var_kernel=$(uname -r)
-var_uptime=$(uptime -p)
-var_cpu=$( < /proc/cpuinfo grep "model name" -m1 | awk '{ print $4, $5, $6, $7, $8, $9, $10 }')
-
 get_zfs_data() {
 var_zfs_last_snapshot_all=$(zfs list -H -t snapshot -o name -S creation)
 var_zfs_pool_status=$(zpool status | grep -E "(pool:|state:|scan:|errors:)" )
@@ -33,10 +28,10 @@ printHeadLine(){
 printf "\\ec"
 
 printHeadLine "System-Info"
-echo -e System OS:'\t'"$var_os"
-echo -e Kernel:'\t\t'"$var_kernel"
-echo -e Uptime:'\t\t'"$var_uptime"
-echo -e CPU:'\t\t'"$var_cpu"
+echo -e System OS:'\t'"Debian"
+echo -e Kernel:'\t\t'"$(uname -r)"
+echo -e Uptime:'\t\t'"$(uptime -p)"
+echo -e CPU:'\t\t'"$(< /proc/cpuinfo awk '/model name/{print $4, $5, $6, $7, $8, $9, $10; exit}')"
 echo -e ""
 echo "## Temperaturen CPU ##"
 echo -e ""
