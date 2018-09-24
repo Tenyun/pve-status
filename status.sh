@@ -20,8 +20,8 @@ printHeadLine(){
     eval printf %.0s# '{1..'"${COLUMNS:-$(tput cols)}"\}; echo
     textsize=${#1}
     width=$(tput cols)
-    span=$((($width + $textsize) / 2))
-    printf "%${span}s\n" "$1"
+    span=$(((width + textsize) / 2))
+    printf "%${span}s\\n" "$1"
     eval printf %.0s# '{1..'"${COLUMNS:-$(tput cols)}"\}; echo
 }
 
@@ -51,7 +51,7 @@ echo -e ""
 
 echo "## Snapshots ##"
 echo -e ""
-echo Lätzte Snapshots
+echo Letzte Snapshots
 echo -e "Stündlich \\tTäglich \\tMonatlich \\t\\tJährlich"
 echo -e "$var_zfs_last_snapshot_hourly \\t$var_zfs_last_snapshot_daily \\t$var_zfs_last_snapshot_monthly \\t$var_zfs_last_snapshot_yearly"
 echo -e ""
