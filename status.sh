@@ -8,11 +8,11 @@
 get_zfs_data() {
 var_zfs_last_snapshot_all=$(zfs list -H -t snapshot -o name -S creation)
 var_zfs_pool_status=$(zpool status | grep -E "(pool:|state:|scan:|errors:)" )
-var_zfs_last_snapshot_hourly=$(echo "$var_zfs_last_snapshot_all" | grep hourly | head -1 | awk -F_ '{print $(NF-1)}')
-var_zfs_last_snapshot_daily=$(echo "$var_zfs_last_snapshot_all" | grep daily | head -1 | awk -F_ '{print $(NF-1)}')
-var_zfs_last_snapshot_monthly=$(echo "$var_zfs_last_snapshot_all" | grep monthly | head -1 | awk -F_ '{print $(NF-2)"_"$(NF-1)}')
-var_zfs_last_snapshot_yearly=$(echo "$var_zfs_last_snapshot_all" | grep yearly | head -1 | awk -F_ '{print $(NF-2)"_"$(NF-1)}')
-var_zfs_snapshots_count=$(echo "$var_zfs_last_snapshot_all" | nl | tail -1| awk -F' ' '{print $(NF-1)}')
+var_zfs_last_snapshot_hourly=$(echo "$var_zfs_last_snapshot_all" | awk -F_ '/hourly/{h=$(NF-1)} NR==1{print h}')
+var_zfs_last_snapshot_daily=$(echo "$var_zfs_last_snapshot_all" | awk -F_ '/daily/{d=$(NF-1)} NR==1{print d}')
+var_zfs_last_snapshot_monthly=$(echo "$var_zfs_last_snapshot_all" | awk -F_ '/hourly/{h=$(NF-2)"_"$(NF-1)} NR==1{print h}')
+var_zfs_last_snapshot_yearly=$(echo "$var_zfs_last_snapshot_all" | awk -F_ '/yearly/{y=$(NF-2)"_"$(NF-1)} NR==1{print y}')
+var_zfs_snapshots_count=$(echo "$var_zfs_last_snapshot_all" | awk 'END {print NR}')
 var_zfs_cap_mainpool=$(zpool list -H -o name,capacity)
 }
 
