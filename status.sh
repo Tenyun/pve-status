@@ -35,7 +35,7 @@ echo -e CPU:'\t\t'"$(< /proc/cpuinfo awk '/model name/{print $4, $5, $6, $7, $8,
 echo -e ""
 echo "## Temperaturen CPU ##"
 echo -e ""
-sensors | awk '/Core|Package/' | cut -d "(" -f 1
+sensors | awk -F\( '/Core|Package/{print $(NF-1)}'
 echo -e ""
 echo "## Speicherauslastung ##"
 echo ""
