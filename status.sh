@@ -1,9 +1,21 @@
-#!/bin/bash
-
+#!/bin/bash -
+#===============================================================================
 #
-# Dieses Script gibt einen Überblick über den PVE Server
-# (hostname, ip, zfs-filesystem, zfs-snapshots, etc)
+#          FILE: status.sh
 #
+#         USAGE: ./status.sh
+#
+#   DESCRIPTION: System status script for PROXMOX PVE
+#
+#       OPTIONS: ---
+#  REQUIREMENTS: root permisions and sanoid for snapshot management
+#          BUGS: ---
+#         NOTES: ad a alias like st to /usr/sbin/
+#        AUTHOR: Dustin Hutto (Sysadmin), huttodustin@gmail.com
+#  ORGANIZATION: -
+#       CREATED: 09.10.2018 19:43:49
+#      REVISION:  ---
+#===============================================================================
 
 get_zfs_data() {
 var_zfs_last_snapshot_all=$(zfs list -H -t snapshot -o name -S creation)
