@@ -17,6 +17,8 @@
 #      REVISION:  ---
 #===============================================================================
 
+set -o nounset                                  # Treat unset variables as an error
+
 get_zfs_data() {
 var_zfs_last_snapshot_all=$(zfs list -H -t snapshot -o name -S creation)
 var_zfs_pool_status=$(zpool status | grep -E "(pool:|state:|scan:|errors:)" )
