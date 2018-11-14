@@ -31,12 +31,11 @@ var_zfs_cap_mainpool=$(zpool list -H -o name,capacity)
 }
 
 printHeadLine(){
-    eval printf %.0s# '{1..'"${COLUMNS:-$(tput cols)}"\}; echo
     textsize=${#1}
-    width=$(tput cols)
-    span=$(((width + textsize) / 2))
+        span=$(((textsize + 60) / 2))
+        printf '%.0s=' {1..60}; echo
     printf "%${span}s\\n" "$1"
-    eval printf %.0s# '{1..'"${COLUMNS:-$(tput cols)}"\}; echo
+    printf '%.0s=' {1..60}; echo
 }
 
 printf "\\ec"
@@ -51,7 +50,8 @@ printf "## CPU Temperature ##\n\n"
 sensors | awk -F\( '/Core|Package/{print $(NF-1)}'
 printf "\n"
 printf "## Memory usage ##\n\n"
-free -h
+var_mem_info=$(free -hw)
+awk '/Mem/{printf "%-14s %-7s %-14s %s\n%-14s %-7s %-14s %s\n", "Total:", $2, "Used:", $3, "Free:", $4, "Shared:", $5}' <<< "$var_mem_info"
 printf "\n"
 
 printHeadLine "ZFS STATUS"
