@@ -10,7 +10,7 @@
 #       OPTIONS: ---
 #  REQUIREMENTS: root permisions and sanoid for snapshot management
 #          BUGS: ---
-#         NOTES: ad a alias like st to /usr/sbin/
+#         NOTES: ad a alias like st to /usr/local/sbin/
 #        AUTHOR: Dustin Hutto (Sysadmin), huttodustin@gmail.com
 #  ORGANIZATION: -
 #       CREATED: 09.10.2018 19:43:49
