@@ -41,7 +41,7 @@ printHeadLine(){
 printf "\\ec"
 
 printHeadLine "SYSTEM INFO"
-printf "%-14s %s\n" "System:" "Debian"
+printf "%-14s %s\n" "System:" "$(awk -F'"' '/PRETTY_NAME/ {print $2}' /etc/os-release)"
 printf "%-14s %s\n" "Kernel:" "$(uname -r)"
 printf "%-14s %s\n" "Uptime:" "$(uptime -p)"
 printf "%-14s %s\n\n" "CPU:" "$(< /proc/cpuinfo awk '/model name/{print $4, $5, $6, $7, $8, $9, $10; exit}')"
