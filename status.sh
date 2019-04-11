@@ -47,7 +47,25 @@ printf "%-14s %s\n" "Uptime:" "$(uptime -p)"
 printf "%-14s %s\n\n" "CPU:" "$(< /proc/cpuinfo awk '/model name/{print $4, $5, $6, $7, $8, $9, $10; exit}')"
 
 printf "## CPU Temperature ##\n\n"
-sensors | awk -F\( '/Core|Package/{print $(NF-1)}'
+cpu_count=$(lscpu | awk -F: '/NUMA\ node\(s\)/{print $2-1}')
+
+for i in $(seq 0 "$cpu_count") 
+do
+	cpu[$i]=$(sensors -A -- *-isa-000"$i" | awk -F\( '/Core|Package/{print $(NF-1)}')
+done
+
+if [ "$cpu_count" -lt 1 ]
+then
+	printf "%s\n" "${cpu[0]}"
+elif [ "$cpu_count" -ge 1 ]
+then
+	for v in $(seq 0 2 "$cpu_count")
+	do
+		paste <(printf "%s" "${cpu[$v]}") <(printf "%s" "${cpu[$v + 1]}")
+		printf "\n"
+	done
+fi
+
 printf "\n"
 printf "## Memory usage ##\n\n"
 var_mem_info=$(free -hw)
