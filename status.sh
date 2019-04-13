@@ -57,6 +57,7 @@ done
 if [ "$cpu_count" -lt 1 ]
 then
 	printf "%s\n" "${cpu[0]}"
+	printf "\n"
 elif [ "$cpu_count" -ge 1 ]
 then
 	for v in $(seq 0 2 "$cpu_count")
@@ -66,7 +67,6 @@ then
 	done
 fi
 
-printf "\n"
 printf "## Memory usage ##\n\n"
 var_mem_info=$(free -hw)
 awk '/Mem/{printf "%-14s %-7s %-14s %s\n%-14s %-7s %-14s %s\n", "Total:", $2, "Used:", $3, "Free:", $4, "Shared:", $5}' <<< "$var_mem_info"
