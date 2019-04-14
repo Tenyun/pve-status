@@ -10,7 +10,7 @@ Clone the repository:
 
 	https://gitea.omniaty.ddnss.de/Tenyun/pve-status.git
 
-2. link status.sh to:
+Link status.sh to e.g.:
 
 	ln -s /path/to/pve-status/status.sh /usr/sbin/st
 
