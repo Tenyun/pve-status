@@ -11,7 +11,7 @@
 #  REQUIREMENTS: root permisions and sanoid for snapshot management
 #          BUGS: ---
 #         NOTES: ad a alias like st to /usr/local/sbin/
-#        AUTHOR: Dustin Hutto (Sysadmin), huttodustin@gmail.com
+#        AUTHOR: Tenyun (Sysadmin), tenyun@disroot.org
 #  ORGANIZATION: -
 #       CREATED: 09.10.2018 19:43:49
 #      REVISION:  ---
@@ -49,7 +49,7 @@ printf "%-14s %s\n\n" "CPU:" "$(< /proc/cpuinfo awk '/model name/{print $4, $5, 
 printf "## CPU Temperature ##\n\n"
 cpu_count=$(lscpu | awk -F: '/NUMA\ node\(s\)/{print $2-1}')
 
-for i in $(seq 0 "$cpu_count") 
+for i in $(seq 0 "$cpu_count")
 do
 	cpu[$i]=$(sensors -A -- *-isa-000"$i" | awk -F\( '/Core|Package/{print $(NF-1)}')
 done
@@ -75,7 +75,7 @@ printf "\n"
 printHeadLine "ZFS STATUS"
 get_zfs_data
 printf "## Pool status ##\n\n"
-awk 'BEGIN{OFS = "-"; print "Pool-Name""\t""Status""\t""Last-Scrub""\t""\t""Repaired-Errors""\t""Scrub-Errors""\t""Time""\t""Data-Errors"}; 
+awk 'BEGIN{OFS = "-"; print "Pool-Name""\t""Status""\t""Last-Scrub""\t""\t""Repaired-Errors""\t""Scrub-Errors""\t""Time""\t""Data-Errors"};
 /pool/{ POOL=$2; next} /state/{STATE=$2; next} /scan/{SCAN1=$12"-"$13"-"$14"-"$15; SCAN2=$4; SCAN3=$8; SCAN4=$6; next} /error/{$1=""; print POOL"\t"STATE"\t"SCAN1"\t"SCAN2"\t"SCAN3"\t"SCAN4"\t"$0}' <<< "$var_zfs_pool_status" | column -t
 
 printf "\n## Snapshots ##\n\n"
