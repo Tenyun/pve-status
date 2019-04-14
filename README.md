@@ -1,9 +1,8 @@
 # Status script for Proxmox Virtual Environment (PVE)
 
 ## Requirements
-one or more zfs pools
-
-[Sanoid] (https://github.com/jimsalterjrs/sanoid) for snapshot management
+* one or more zfs pools
+* [Sanoid] (https://github.com/jimsalterjrs/sanoid) for snapshot management
 
 ## Installation
 
