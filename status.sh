@@ -19,15 +19,18 @@
 
 set -o nounset                                  # Treat unset variables as an error
 
+ZFS_BIN=$(whereis -b zfs | awk '{print $2}')
+ZPOOL_BIN=$(whereis -b zpool | awk '{print $2}')
+
 get_zfs_data() {
-var_zfs_last_snapshot_all=$(zfs list -H -t snapshot -o name -S creation)
-var_zfs_pool_status=$(zpool status | grep -E "(pool:|state:|scan:|errors:)" )
+var_zfs_last_snapshot_all=$($ZFS_BIN list -H -t snapshot -o name -S creation)
+var_zfs_pool_status=$($ZPOOL_BIN status | grep -E "(pool:|state:|scan:|errors:)" )
 var_zfs_last_snapshot_hourly=$(awk -F_ '/hourly/{print $(NF-1);exit;}' <<< "$var_zfs_last_snapshot_all")
 var_zfs_last_snapshot_daily=$(awk -F_ '/daily/{print $(NF-1);exit;}' <<< "$var_zfs_last_snapshot_all")
 var_zfs_last_snapshot_monthly=$(awk -F_ '/monthly/{print $(NF-2)"_"$(NF-1);exit;}' <<< "$var_zfs_last_snapshot_all")
 var_zfs_last_snapshot_yearly=$(awk -F_ '/yearly/{print $(NF-2)"_"$(NF-1);exit;}' <<< "$var_zfs_last_snapshot_all")
 var_zfs_snapshots_count=$(awk 'END {print NR}' <<< "$var_zfs_last_snapshot_all")
-var_zfs_cap_mainpool=$(zpool list -H -o name,capacity)
+var_zfs_cap_mainpool=$($ZPOOL_BIN list -H -o name,capacity)
 }
 
 printHeadLine(){
