@@ -8,7 +8,7 @@
 #   DESCRIPTION: System status script for PROXMOX PVE
 #
 #       OPTIONS: ---
-#  REQUIREMENTS: root permisions and sanoid for snapshot management
+#  REQUIREMENTS: sanoid for snapshot management
 #          BUGS: ---
 #         NOTES: ad a alias like st to /usr/local/sbin/
 #        AUTHOR: Tenyun (Sysadmin), tenyun@disroot.org
