@@ -8,7 +8,7 @@
 #   DESCRIPTION: System status script for PROXMOX PVE
 #
 #       OPTIONS: ---
-#  REQUIREMENTS: root permisions and sanoid for snapshot management
+#  REQUIREMENTS: sanoid for snapshot management
 #          BUGS: ---
 #         NOTES: ad a alias like st to /usr/local/sbin/
 #        AUTHOR: Tenyun (Sysadmin), tenyun@disroot.org
@@ -19,15 +19,17 @@
 
 set -o nounset                                  # Treat unset variables as an error
 
+ZFS_BIN=$(whereis -b zfs | awk '{print $2}')
+ZPOOL_BIN=$(whereis -b zpool | awk '{print $2}')
+
 get_zfs_data() {
-var_zfs_last_snapshot_all=$(zfs list -H -t snapshot -o name -S creation)
-var_zfs_pool_status=$(zpool status | grep -E "(pool:|state:|scan:|errors:)" )
+var_zfs_last_snapshot_all=$($ZFS_BIN list -H -t snapshot -o name -S creation)
 var_zfs_last_snapshot_hourly=$(awk -F_ '/hourly/{print $(NF-1);exit;}' <<< "$var_zfs_last_snapshot_all")
 var_zfs_last_snapshot_daily=$(awk -F_ '/daily/{print $(NF-1);exit;}' <<< "$var_zfs_last_snapshot_all")
 var_zfs_last_snapshot_monthly=$(awk -F_ '/monthly/{print $(NF-2)"_"$(NF-1);exit;}' <<< "$var_zfs_last_snapshot_all")
 var_zfs_last_snapshot_yearly=$(awk -F_ '/yearly/{print $(NF-2)"_"$(NF-1);exit;}' <<< "$var_zfs_last_snapshot_all")
 var_zfs_snapshots_count=$(awk 'END {print NR}' <<< "$var_zfs_last_snapshot_all")
-var_zfs_cap_mainpool=$(zpool list -H -o name,capacity)
+var_zfs_cap_mainpool=$($ZPOOL_BIN list -H -o name,capacity)
 }
 
 printHeadLine(){
@@ -75,8 +77,7 @@ printf "\n"
 printHeadLine "ZFS STATUS"
 get_zfs_data
 printf "## Pool status ##\n\n"
-awk 'BEGIN{OFS = "-"; print "Pool-Name""\t""Status""\t""Last-Scrub""\t""\t""Repaired-Errors""\t""Scrub-Errors""\t""Time""\t""Data-Errors"};
-/pool/{ POOL=$2; next} /state/{STATE=$2; next} /scan/{SCAN1=$12"-"$13"-"$14"-"$15; SCAN2=$4; SCAN3=$8; SCAN4=$6; next} /error/{$1=""; print POOL"\t"STATE"\t"SCAN1"\t"SCAN2"\t"SCAN3"\t"SCAN4"\t"$0}' <<< "$var_zfs_pool_status" | column -t
+$ZPOOL_BIN status -x
 
 printf "\n## Snapshots ##\n\n"
 printf "Last zfs snapshots\n"
