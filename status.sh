@@ -17,27 +17,29 @@
 #      REVISION:  ---
 #===============================================================================
 
-set -o nounset                                  # Treat unset variables as an error
+set -o nounset # Treat unset variables as an error
 
 ZFS_BIN=$(whereis -b zfs | awk '{print $2}')
 ZPOOL_BIN=$(whereis -b zpool | awk '{print $2}')
 
 get_zfs_data() {
-var_zfs_last_snapshot_all=$($ZFS_BIN list -H -t snapshot -o name -S creation)
-var_zfs_last_snapshot_hourly=$(awk -F_ '/hourly/{print $(NF-1);exit;}' <<< "$var_zfs_last_snapshot_all")
-var_zfs_last_snapshot_daily=$(awk -F_ '/daily/{print $(NF-1);exit;}' <<< "$var_zfs_last_snapshot_all")
-var_zfs_last_snapshot_monthly=$(awk -F_ '/monthly/{print $(NF-2)"_"$(NF-1);exit;}' <<< "$var_zfs_last_snapshot_all")
-var_zfs_last_snapshot_yearly=$(awk -F_ '/yearly/{print $(NF-2)"_"$(NF-1);exit;}' <<< "$var_zfs_last_snapshot_all")
-var_zfs_snapshots_count=$(awk 'END {print NR}' <<< "$var_zfs_last_snapshot_all")
-var_zfs_cap_mainpool=$($ZPOOL_BIN list -H -o name,capacity)
+	var_zfs_last_snapshot_all=$($ZFS_BIN list -H -t snapshot -o name -S creation)
+	var_zfs_last_snapshot_hourly=$(awk -F_ '/hourly/{print $(NF-1);exit;}' <<<"$var_zfs_last_snapshot_all")
+	var_zfs_last_snapshot_daily=$(awk -F_ '/daily/{print $(NF-1);exit;}' <<<"$var_zfs_last_snapshot_all")
+	var_zfs_last_snapshot_monthly=$(awk -F_ '/monthly/{print $(NF-2)"_"$(NF-1);exit;}' <<<"$var_zfs_last_snapshot_all")
+	var_zfs_last_snapshot_yearly=$(awk -F_ '/yearly/{print $(NF-2)"_"$(NF-1);exit;}' <<<"$var_zfs_last_snapshot_all")
+	var_zfs_snapshots_count=$(awk 'END {print NR}' <<<"$var_zfs_last_snapshot_all")
+	var_zfs_cap_mainpool=$($ZPOOL_BIN list -H -o name,capacity)
 }
 
-printHeadLine(){
-    textsize=${#1}
-        span=$(((textsize + 60) / 2))
-        printf '%.0s=' {1..60}; echo
-    printf "%${span}s\\n" "$1"
-    printf '%.0s=' {1..60}; echo
+printHeadLine() {
+	textsize=${#1}
+	span=$(((textsize + 60) / 2))
+	printf '%.0s=' {1..60}
+	echo
+	printf "%${span}s\\n" "$1"
+	printf '%.0s=' {1..60}
+	echo
 }
 
 printf "\\ec"
@@ -46,24 +48,20 @@ printHeadLine "SYSTEM INFO"
 printf "%-14s %s\n" "System:" "$(awk -F'"' '/PRETTY_NAME/ {print $2}' /etc/os-release)"
 printf "%-14s %s\n" "Kernel:" "$(uname -r)"
 printf "%-14s %s\n" "Uptime:" "$(uptime -p)"
-printf "%-14s %s\n\n" "CPU:" "$(< /proc/cpuinfo awk '/model name/{print $4, $5, $6, $7, $8, $9, $10; exit}')"
+printf "%-14s %s\n\n" "CPU:" "$(awk </proc/cpuinfo '/model name/{print $4, $5, $6, $7, $8, $9, $10; exit}')"
 
 printf "## CPU Temperature ##\n\n"
 cpu_count=$(lscpu | awk -F: '/NUMA\ node\(s\)/{print $2-1}')
 
-for i in $(seq 0 "$cpu_count")
-do
+for i in $(seq 0 "$cpu_count"); do
 	cpu[$i]=$(sensors -A -- *-isa-000"$i" | awk -F\( '/Core|Package/{print $(NF-1)}')
 done
 
-if [ "$cpu_count" -lt 1 ]
-then
+if [ "$cpu_count" -lt 1 ]; then
 	printf "%s\n" "${cpu[0]}"
 	printf "\n"
-elif [ "$cpu_count" -ge 1 ]
-then
-	for v in $(seq 0 2 "$cpu_count")
-	do
+elif [ "$cpu_count" -ge 1 ]; then
+	for v in $(seq 0 2 "$cpu_count"); do
 		paste <(printf "%s" "${cpu[$v]}") <(printf "%s" "${cpu[$v + 1]}")
 		printf "\n"
 	done
@@ -71,7 +69,7 @@ fi
 
 printf "## Memory usage ##\n\n"
 var_mem_info=$(free -hw)
-awk '/Mem/{printf "%-14s %-7s %-14s %s\n%-14s %-7s %-14s %s\n", "Total:", $2, "Used:", $3, "Free:", $4, "Shared:", $5}' <<< "$var_mem_info"
+awk '/Mem/{printf "%-14s %-7s %-14s %s\n%-14s %-7s %-14s %s\n", "Total:", $2, "Used:", $3, "Free:", $4, "Shared:", $5}' <<<"$var_mem_info"
 printf "\n"
 
 printHeadLine "ZFS STATUS"
