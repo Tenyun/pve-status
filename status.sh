@@ -8,7 +8,7 @@
 #   DESCRIPTION: System status script for PROXMOX PVE
 #
 #       OPTIONS: ---
-#  REQUIREMENTS: sanoid for snapshot management
+#  REQUIREMENTS: cv4pve-autosnap for snapshot management
 #          BUGS: ---
 #         NOTES: ad a alias like st to /usr/local/sbin/
 #        AUTHOR: Tenyun (Sysadmin), tenyun@disroot.org
@@ -21,14 +21,16 @@ set -o nounset # Treat unset variables as an error
 
 ZFS_BIN=$(whereis -b zfs | awk '{print $2}')
 ZPOOL_BIN=$(whereis -b zpool | awk '{print $2}')
+SNAP_HOST="127.0.0.1"
+API_TOKEN="user@REALM!TOKENID=UUID"
 
 get_zfs_data() {
-	var_zfs_last_snapshot_all=$($ZFS_BIN list -H -t snapshot -o name -S creation)
-	var_zfs_last_snapshot_hourly=$(awk -F_ '/hourly/{print $(NF-1);exit;}' <<<"$var_zfs_last_snapshot_all")
-	var_zfs_last_snapshot_daily=$(awk -F_ '/daily/{print $(NF-1);exit;}' <<<"$var_zfs_last_snapshot_all")
-	var_zfs_last_snapshot_monthly=$(awk -F_ '/monthly/{print $(NF-2)"_"$(NF-1);exit;}' <<<"$var_zfs_last_snapshot_all")
-	var_zfs_last_snapshot_yearly=$(awk -F_ '/yearly/{print $(NF-2)"_"$(NF-1);exit;}' <<<"$var_zfs_last_snapshot_all")
-	var_zfs_snapshots_count=$(awk 'END {print NR}' <<<"$var_zfs_last_snapshot_all")
+  var_zfs_last_snapshot_all=$(cv4pve-autosnap --host="$SNAP_HOST" --api-token="$API_TOKEN" --vmid="all" status --output="Markdown")
+  var_zfs_last_snapshot_hourly=$(awk -F"|" '/daily/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
+  var_zfs_last_snapshot_daily=$(awk -F"|" '/daily/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
+  var_zfs_last_snapshot_monthly=$(awk -F"|" '/monthly/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
+  var_zfs_last_snapshot_yearly=$(awk -F"|" '/yearly/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
+	var_zfs_snapshots_count=$(awk 'END {print NR-2}' <<<"$var_zfs_last_snapshot_all")
 	var_zfs_cap_mainpool=$($ZPOOL_BIN list -H -o name,capacity)
 }
 
