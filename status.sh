@@ -26,10 +26,10 @@ API_TOKEN="user@REALM!TOKENID=UUID"
 
 get_zfs_data() {
   var_zfs_last_snapshot_all=$(cv4pve-autosnap --host="$SNAP_HOST" --api-token="$API_TOKEN" --vmid="all" status --output="Markdown")
-  var_zfs_last_snapshot_hourly=$(awk -F"|" '/daily/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
+  var_zfs_last_snapshot_hourly=$(awk -F"|" '/hourly/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
   var_zfs_last_snapshot_daily=$(awk -F"|" '/daily/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
+  var_zfs_last_snapshot_weekly=$(awk -F"|" '/weekly/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
   var_zfs_last_snapshot_monthly=$(awk -F"|" '/monthly/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
-  var_zfs_last_snapshot_yearly=$(awk -F"|" '/yearly/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
 	var_zfs_snapshots_count=$(awk 'END {print NR-2}' <<<"$var_zfs_last_snapshot_all")
 	var_zfs_cap_mainpool=$($ZPOOL_BIN list -H -o name,capacity)
 }
@@ -80,11 +80,11 @@ printf "## Pool status ##\n\n"
 $ZPOOL_BIN status -x
 
 printf "\n## Snapshots ##\n\n"
-printf "Last zfs snapshots\n"
+printf "Last zfs snapshots (Timezone UTC)\n"
 printf "%-10s %s\n" "HOURLY:" "$var_zfs_last_snapshot_hourly"
 printf "%-10s %s\n" "DAILY:" "$var_zfs_last_snapshot_daily"
-printf "%-10s %s\n" "MONTHLY:" "$var_zfs_last_snapshot_monthly"
-printf "%-10s %s\n\n" "YEARLY:" "$var_zfs_last_snapshot_yearly"
+printf "%-10s %s\n" "WEEKLY:" "$var_zfs_last_snapshot_weekly"
+printf "%-10s %s\n\n" "MONTHLY:" "$var_zfs_last_snapshot_monthly"
 printf "%-10s %s\n\n" "Total Snapshots:" "$var_zfs_snapshots_count"
 
 printf "## Pool Capacity\'s  ##\n\n"
