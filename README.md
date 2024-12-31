@@ -8,12 +8,19 @@
 
 Clone the repository:
 ```
-	https://gitea.omniaty.ddnss.de/Tenyun/pve-status.git
+  https://github.com/Tenyun/pve-status.git
 ```
 Link status.sh to e.g.:
 ```
-	ln -s /path/to/pve-status/status.sh /usr/sbin/st
+	ln -s /path/to/pve-status/status.sh /usr/local/bin/st
 ```
+## Configuration
+Setup the path to your cv4pve-autosnap cron script
+make shure that the variable name for the api token
+inside the cron script is set to "API_TOKEN".
+You can also setup the API_TOKEN inside the script
+
+(the cron script will be prefered if available)
 ## Example
 ```
   ============================================================
