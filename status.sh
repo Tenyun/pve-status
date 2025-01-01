@@ -93,22 +93,48 @@ printf "%-14s %s\n" "Uptime:" "$(uptime -p)"
 printf "%-14s %s\n\n" "CPU:" "$(awk </proc/cpuinfo '/model name/{print $4, $5, $6, $7, $8, $9, $10; exit}')"
 
 printf "## CPU Temperature ##\n\n"
+# Determine CPU vendor (Intel or AMD)
+cpu_vendor=$(lscpu | awk -F: '/Vendor ID/ {print $2}' | tr -d '[:space:]')
+
+# Get the number of NUMA nodes (number of sockets - 1)
 cpu_count=$(lscpu | awk -F: '/NUMA\ node\(s\)/{print $2-1}')
 
-for i in $(seq 0 "$cpu_count"); do
-	cpu[$i]=$(sensors -A -- *-isa-000"$i" | awk -F\( '/Core|Package/{print $(NF-1)}')
-done
+# Initialize temperature array
+declare -a cpu
 
-if [ "$cpu_count" -lt 1 ]; then
-	printf "%s\n" "${cpu[0]}"
-	printf "\n"
-elif [ "$cpu_count" -ge 1 ]; then
-	for v in $(seq 0 2 "$cpu_count"); do
-		paste <(printf "%s" "${cpu[$v]}") <(printf "%s" "${cpu[$v + 1]}")
-		printf "\n"
-	done
+# Check if the CPU is AMD or Intel
+if [ "$cpu_vendor" == "AuthenticAMD" ]; then
+    # For AMD CPUs, we need to check if we have individual core temperatures or just package temperature
+    # Check if the Tctl temperature is available (if it is, it's likely the package temperature)
+    if sensors | awk '/Tctl/' > /dev/null; then
+        # If only Tctl (package) temperature is available
+        for i in $(seq 0 "$cpu_count"); do
+            cpu[i]=$(sensors | awk -F': ' '/Tctl/{print }' | head -n 1)  # Get Tctl (package) temperature
+        done
+    else
+        # If individual core temperatures are available
+        for i in $(seq 0 "$cpu_count"); do
+            cpu[i]=$(sensors -A | grep -i "core $i" | awk -F'[\+\ ]' '{print $2}')
+        done
+    fi
+else
+    # For Intel CPUs, query the sensors for core and package temperatures
+    for i in $(seq 0 "$cpu_count"); do
+        cpu[i]=$(sensors -A | awk -F\( "/Core $i|Package/{print \$(NF-1)}")
+    done
 fi
 
+# Output temperature information
+if [ "$cpu_count" -lt 1 ]; then
+    printf "%s\n" "${cpu[0]}"
+    printf "\n"
+elif [ "$cpu_count" -ge 1 ]; then
+    # Pair temperatures for each socket (e.g., socket 0, socket 1, etc.)
+    for v in $(seq 0 2 "$cpu_count"); do
+        paste <(printf "%s" "${cpu[$v]}") <(printf "%s" "${cpu[$v + 1]}")
+        printf "\n"
+    done
+fi
 printf "## Memory usage ##\n\n"
 var_mem_info=$(free -hw)
 awk '/Mem/{printf "%-14s %-7s %-14s %s\n%-14s %-7s %-14s %s\n", "Total:", $2, "Used:", $3, "Free:", $4, "Shared:", $5}' <<<"$var_mem_info"
