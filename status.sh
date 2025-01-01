@@ -19,13 +19,53 @@
 
 set -o nounset # Treat unset variables as an error
 
-ZFS_BIN=$(whereis -b zfs | awk '{print $2}')
+#ZFS_BIN=$(whereis -b zfs | awk '{print $2}')
 ZPOOL_BIN=$(whereis -b zpool | awk '{print $2}')
 SNAP_HOST="127.0.0.1"
-API_TOKEN="user@REALM!TOKENID=UUID"
+CRON_SCRIPT="/etc/cron.d/snapshot"
+# Set API_TOKEN to your snapshot user created in proxmox
+# API_TOKEN="snapuser@REALM!TOKENID=UUID"
+API_TOKEN=""
+# Function to extract API_TOKEN from CRON_SCRIPT
+extract_token_from_script() {
+    if [[ -e "$CRON_SCRIPT" && -f "$CRON_SCRIPT" ]]; then
+        # Extract token from non-commented lines
+        local token
+        token=$(awk -F'"' '!/^#/ && /API_TOKEN/ {print $2; exit}' "$CRON_SCRIPT")
+        if [[ -n "$token" ]]; then
+            echo "$token"
+        else
+            printf "Error: API_TOKEN not found in %s\n" "$CRON_SCRIPT"
+            exit 1
+        fi
+    else
+        printf "Error: CRON_SCRIPT not found: %s\n" "$CRON_SCRIPT"
+        exit 1
+    fi
+}
+ 
+if [[ -z "$API_TOKEN" ]]; then
+    # If API_TOKEN is not set try to extract it from CRON_SCRIPT
+    if [[ -e "$CRON_SCRIPT" && -f "$CRON_SCRIPT" ]]; then
+        API_TOKEN=$(extract_token_from_script)
+    else
+        printf "Error: API_TOKEN is not set and CRON_SCRIPT does not exist.\n"
+        exit 1                                                                                                                                                                                      
+    fi                                                                                                                                                                                              
+else                                                                                                                                                                                                
+    # If API_TOKEN is set still check if CRON_SCRIPT is available
+    if [[ -e "$CRON_SCRIPT" && -f "$CRON_SCRIPT" ]]; then
+        # Optionally update API_TOKEN from the script
+        API_TOKEN=$(extract_token_from_script)
+    fi
+fi
 
 get_zfs_data() {
-  var_zfs_last_snapshot_all=$(cv4pve-autosnap --host="$SNAP_HOST" --api-token="$API_TOKEN" --vmid="all" status --output="Markdown")
+  # Check if the command succeeded
+  if ! var_zfs_last_snapshot_all=$(cv4pve-autosnap --host="$SNAP_HOST" --api-token="$API_TOKEN" --vmid="all" status --output="Markdown"); then
+    printf "Error: Failed to fetch ZFS snapshots. Please check cv4pve-autosnap and API_TOKEN configuration.\n"
+    exit 1
+  fi
   var_zfs_last_snapshot_hourly=$(awk -F"|" '/hourly/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
   var_zfs_last_snapshot_daily=$(awk -F"|" '/daily/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
   var_zfs_last_snapshot_weekly=$(awk -F"|" '/weekly/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
