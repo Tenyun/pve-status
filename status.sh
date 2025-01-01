@@ -60,20 +60,6 @@ else
     fi
 fi
 
-get_zfs_data() {
-  # Check if the command succeeded
-  if ! var_zfs_last_snapshot_all=$(cv4pve-autosnap --host="$SNAP_HOST" --api-token="$API_TOKEN" --vmid="all" status --output="Markdown"); then
-    printf "Error: Failed to fetch ZFS snapshots. Please check cv4pve-autosnap and API_TOKEN configuration.\n"
-    exit 1
-  fi
-  var_zfs_last_snapshot_hourly=$(awk -F"|" '/hourly/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
-  var_zfs_last_snapshot_daily=$(awk -F"|" '/daily/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
-  var_zfs_last_snapshot_weekly=$(awk -F"|" '/weekly/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
-  var_zfs_last_snapshot_monthly=$(awk -F"|" '/monthly/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
-	var_zfs_snapshots_count=$(awk 'END {print NR-2}' <<<"$var_zfs_last_snapshot_all")
-	var_zfs_cap_mainpool=$($ZPOOL_BIN list -H -o name,capacity)
-}
-
 printHeadLine() {
 	textsize=${#1}
 	span=$(((textsize + 60) / 2))
@@ -141,17 +127,46 @@ awk '/Mem/{printf "%-14s %-7s %-14s %s\n%-14s %-7s %-14s %s\n", "Total:", $2, "U
 printf "\n"
 
 printHeadLine "ZFS STATUS"
-get_zfs_data
 printf "## Pool status ##\n\n"
 $ZPOOL_BIN status -x
 
+# Print the initial placeholders for snapshots and pool capacity
 printf "\n## Snapshots ##\n\n"
 printf "Last zfs snapshots (Timezone UTC)\n"
-printf "%-10s %s\n" "HOURLY:" "$var_zfs_last_snapshot_hourly"
-printf "%-10s %s\n" "DAILY:" "$var_zfs_last_snapshot_daily"
-printf "%-10s %s\n" "WEEKLY:" "$var_zfs_last_snapshot_weekly"
-printf "%-10s %s\n\n" "MONTHLY:" "$var_zfs_last_snapshot_monthly"
-printf "%-10s %s\n\n" "Total Snapshots:" "$var_zfs_snapshots_count"
+# Save cursor position
+tput sc
+printf "%-10s %s\n" "HOURLY:" "Loading..."
+printf "%-10s %s\n" "DAILY:" "Loading..."
+printf "%-10s %s\n" "WEEKLY:" "Loading..."
+printf "%-10s %s\n\n" "MONTHLY:" "Loading..."
+printf "%-10s %s\n\n" "Total Snapshots:" "Loading..."
+printf "## Pool Capacity's  ##\n\n"
+printf "%s\n" "Loading..."
 
-printf "## Pool Capacity\'s  ##\n\n"
-printf "%s\n" "$var_zfs_cap_mainpool"
+var_zfs_last_snapshot_all=$(cv4pve-autosnap --host="$SNAP_HOST" --api-token="$API_TOKEN" --vmid="all" status --output="Markdown")
+
+# Check if the command was successful
+if [ $? -ne 0 ]; then
+  printf "Error: Failed to fetch ZFS snapshots.\n"
+  exit 1
+fi
+var_zfs_cap_mainpool=$($ZPOOL_BIN list -H -o name,capacity)
+
+# Restore cursor position and update the snapshot and pool capacity information
+tput rc
+
+# Update snapshot details
+var_zfs_last_snapshot_hourly=$(awk -F"|" '/hourly/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
+var_zfs_last_snapshot_daily=$(awk -F"|" '/daily/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
+var_zfs_last_snapshot_weekly=$(awk -F"|" '/weekly/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
+var_zfs_last_snapshot_monthly=$(awk -F"|" '/monthly/ {a=$4} END{print a}' <<<"$var_zfs_last_snapshot_all")
+var_zfs_snapshots_count=$(awk 'END {print NR-2}' <<<"$var_zfs_last_snapshot_all")
+
+# Overwrite the lines with the actual data
+printf "\033[K%-10s %s\n" "HOURLY:" "$var_zfs_last_snapshot_hourly"
+printf "\033[K%-10s %s\n" "DAILY:" "$var_zfs_last_snapshot_daily"
+printf "\033[K%-10s %s\n" "WEEKLY:" "$var_zfs_last_snapshot_weekly"
+printf "\033[K%-10s %s\n\n" "MONTHLY:" "$var_zfs_last_snapshot_monthly"
+printf "\033[K%-10s %s\n\n" "Total Snapshots:" "$var_zfs_snapshots_count"
+printf "\033[K## Pool Capacity's  ##\n\n"
+printf "\033[K%s\n" "$var_zfs_cap_mainpool"
