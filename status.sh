@@ -143,10 +143,10 @@ printf "%-10s %s\n\n" "Total Snapshots:" "Loading..."
 printf "## Pool Capacity's  ##\n\n"
 printf "%s\n" "Loading..."
 
-var_zfs_last_snapshot_all=$(cv4pve-autosnap --host="$SNAP_HOST" --api-token="$API_TOKEN" --vmid="all" status --output="Markdown")
+
 
 # Check if the command was successful
-if [ $? -ne 0 ]; then
+if ! var_zfs_last_snapshot_all=$(cv4pve-autosnap --host="$SNAP_HOST" --api-token="$API_TOKEN" --vmid="all" status --output="Markdown") ; then
   printf "Error: Failed to fetch ZFS snapshots.\n"
   exit 1
 fi
