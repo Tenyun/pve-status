@@ -10,11 +10,11 @@
 #       OPTIONS: ---
 #  REQUIREMENTS: cv4pve-autosnap for snapshot management
 #          BUGS: ---
-#         NOTES: ad a alias like st to /usr/local/sbin/
+#         NOTES: add a alias like st to /usr/local/sbin/
 #        AUTHOR: Tenyun (Sysadmin), tenyun@disroot.org
 #  ORGANIZATION: -
 #       CREATED: 09.10.2018 19:43:49
-#      REVISION:  ---
+#      REVISION:  1.2.0
 #===============================================================================
 
 set -o nounset # Treat unset variables as an error
